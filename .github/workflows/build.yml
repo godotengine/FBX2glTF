@@ -83,7 +83,7 @@ jobs:
 
       - name: Install conan
         run: |
-          pip install --upgrade 'conan>=1.33.0' 
+          pip3 install --upgrade 'conan>=1.33.0' 
         shell: bash
 
       - name: Setup conan profile
