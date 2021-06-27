@@ -78,7 +78,7 @@ jobs:
         
       - name: Install dependencies
         run: |
-          yum install -y curl python3-pip git clang
+          yum install -y curl python3-pip git clang p7z
         shell: bash
 
       - name: Install conan
