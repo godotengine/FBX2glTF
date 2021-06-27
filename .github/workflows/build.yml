@@ -69,7 +69,7 @@ jobs:
           name: FBX2glTF-windows.exe
           path: build/Release/FBX2glTF.exe
   build-ubuntu:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2       
@@ -128,7 +128,7 @@ jobs:
         
       - name: Conan install
         run: |
-          conan install . -i build -s build_type=Release --build fmt -s compiler.libcxx=libstdc++11 --build libiconv --build=libxml2 --build=zlib --build=bzip
+          conan install  . -i build -s build_type=Release --build fmt -s compiler.libcxx=libstdc++11 --build libiconv --build=libxml2 --build=zlib --build=bzip
         shell: bash
 
       - name: Conan build
