@@ -54,11 +54,6 @@ jobs:
           zstd -d -r --rm ./sdk || true
         shell: bash
 
-      - name: Add conan remote
-        run: |
-          conan remote add conancenter https://center.conan.io
-        shell: cmd
-
       - name: Conan install
         run: |
           conan install . -i build -s build_type=Release -s compiler="Visual Studio" --build fmt --build libiconv --build=libxml2 --build=zlib --build=bzip
@@ -130,12 +125,7 @@ jobs:
         run: |
           zstd -d -r --rm ./sdk || true
         shell: bash
-
-      - name: Add conan remote
-        run: |
-          conan remote add conancenter https://center.conan.io
-        shell: bash
-
+        
       - name: Conan install
         run: |
           conan install . -i build -s build_type=Release --build fmt -s compiler.libcxx=libstdc++11 --build libiconv --build=libxml2 --build=zlib --build=bzip
@@ -204,11 +194,6 @@ jobs:
       - name: Decompress sdk
         run: |
           zstd -d -r --rm ./sdk || true
-        shell: bash
-
-      - name: Add conan remote
-        run: |
-          conan remote add conancenter https://center.conan.io
         shell: bash
 
       - name: Conan install
