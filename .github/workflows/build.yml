@@ -56,7 +56,7 @@ jobs:
 
       - name: Add conan remote
         run: |
-          conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+          conan remote add conancenter https://center.conan.io
         shell: cmd
 
       - name: Conan install
@@ -133,7 +133,7 @@ jobs:
 
       - name: Add conan remote
         run: |
-          conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+          conan remote add conancenter https://center.conan.io
         shell: bash
 
       - name: Conan install
@@ -208,7 +208,7 @@ jobs:
 
       - name: Add conan remote
         run: |
-          conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+          conan remote add conancenter https://center.conan.io
         shell: bash
 
       - name: Conan install
