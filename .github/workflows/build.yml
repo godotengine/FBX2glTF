@@ -68,15 +68,17 @@ jobs:
         with:
           name: FBX2glTF-windows.exe
           path: build/Release/FBX2glTF.exe
-  build-ubuntu:
+  build-centos:
     runs-on: ubuntu-18.04
+    container:
+      image: rockylinux/rockylinux:8
     steps:
       - name: Checkout
         uses: actions/checkout@v2       
         
       - name: Install pygments
         run: |
-          sudo apt-get install -y python-pygments
+          yum install -y curl
         shell: bash
 
       - name: Install conan
