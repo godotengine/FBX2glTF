@@ -81,7 +81,7 @@ jobs:
         
       - name: Install pygments
         run: |
-          apt-get install -y python-pygments
+          sudo apt-get install -y python-pygments
         shell: bash
 
       - name: Install conan
