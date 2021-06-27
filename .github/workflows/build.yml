@@ -81,7 +81,7 @@ jobs:
       
       - name: Install conan
         run: |
-          pip install --upgrade conan
+          pip install --upgrade pygments conan 
         shell: bash
 
       - name: Setup conan profile
