@@ -76,9 +76,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2       
         
-      - name: Install pygments
+      - name: Install dependencies
         run: |
-          yum install -y curl
+          yum install -y curl python3-pip
         shell: bash
 
       - name: Install conan
