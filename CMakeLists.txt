@@ -44,7 +44,7 @@ find_package(Threads REQUIRED)
 
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_BINARY_DIR}")
 
-find_package(Boost 1.71 COMPONENTS system filesystem program_options REQUIRED )
+find_package(Boost 1.66 COMPONENTS system filesystem program_options REQUIRED )
 find_package(libxml2 MODULE REQUIRED)
 find_package(ZLIB MODULE REQUIRED)
 find_package(fmt MODULE REQUIRED)
