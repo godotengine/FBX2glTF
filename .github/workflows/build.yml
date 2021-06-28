@@ -83,7 +83,7 @@ jobs:
         
       - name: Install dependencies
         run: |
-          yum install -y curl python3-pip git clang p7zip boost-devel
+          yum install -y curl python3-pip git clang p7zip boost-devel cmake
         shell: bash
 
       - name: Install conan
