@@ -119,7 +119,7 @@ jobs:
             
       - name: install 7z extract
         run: |
-          7z x 2020.2.zip
+          7za x 2020.2.zip
         shell: bash
 
       - name: move
