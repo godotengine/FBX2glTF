@@ -61,12 +61,7 @@ jobs:
 
       - name: Conan install
         run: |
-          conan install . -i build -s build_type=Release -s compiler="Visual Studio" --build=missing
-        shell: cmd
-
-      - name: Conan install missing
-        run: |
-          conan install . -i build -s build_type=Release -s compiler="Visual Studio" --build=missing
+          conan install . -i build -s build_type=Release -s compiler="Visual Studio" --build=missing -o boost:without_fiber=True -o boost:without_stacktrace=True
         shell: cmd
 
       - name: Conan build
@@ -157,11 +152,6 @@ jobs:
       - name: Decompress sdk
         run: |
           zstd -d -r --rm ./sdk || true
-        shell: bash
-
-      - name: Conan install
-        run: |
-          conan install . -i build -s build_type=Release --build fmt -s compiler.libcxx=libstdc++11 --build=missing
         shell: bash
 
       - name: Conan install
@@ -261,11 +251,6 @@ jobs:
       - name: Decompress sdk
         run: |
           zstd -d -r --rm ./sdk || true
-        shell: bash
-
-      - name: Conan install
-        run: |
-          env CMAKE_OSX_ARCHITECTURES=x86_64 conan install . -i build -s build_type=Release --build missing --settings arch=x86_64 --build=missing
         shell: bash
 
       - name: Conan install
