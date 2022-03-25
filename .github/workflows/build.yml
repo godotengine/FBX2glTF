@@ -7,7 +7,7 @@ concurrency:
 
 jobs:
   build-win-10:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout
         uses: actions/checkout@v2
