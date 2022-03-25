@@ -7,7 +7,7 @@ concurrency:
 
 jobs:
   build-win-10:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -61,7 +61,7 @@ jobs:
 
       - name: Conan install
         run: |
-          conan install . -i build -s build_type=Release -s compiler="Visual Studio"
+          conan install . -i build -s build_type=Release -s compiler="Visual Studio" --build=missing -o boost:without_fiber=True -o boost:without_stacktrace=True
         shell: cmd
 
       - name: Conan build
@@ -156,7 +156,7 @@ jobs:
 
       - name: Conan install
         run: |
-          conan install . -i build -s build_type=Release --build fmt -s compiler.libcxx=libstdc++11
+          conan install . -i build -s build_type=Release --build fmt -s compiler.libcxx=libstdc++11 --build=missing
         shell: bash
 
       - name: Conan build
@@ -255,7 +255,7 @@ jobs:
 
       - name: Conan install
         run: |
-          env CMAKE_OSX_ARCHITECTURES=x86_64 conan install . -i build -s build_type=Release --build missing --settings arch=x86_64
+          env CMAKE_OSX_ARCHITECTURES=x86_64 conan install . -i build -s build_type=Release --build missing --settings arch=x86_64 --build=missing
         shell: bash
 
       - name: Conan build

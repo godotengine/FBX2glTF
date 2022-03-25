@@ -1,5 +1,7 @@
 # FBX2GLTF
 
+[![Build FBX2GLTF](https://github.com/DmLvkvch/FBX2glTF/actions/workflows/build.yml/badge.svg)](https://github.com/DmLvkvch/FBX2glTF/actions/workflows/build.yml)
+
 Change skinning-weights to 4 if your engine does not support that feature.
 
 Change the default import of the engine to be different from 30 fps if needed.
