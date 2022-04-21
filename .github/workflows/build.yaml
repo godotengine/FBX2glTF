@@ -1,5 +1,13 @@
 name: "Build FBX2GLTF"
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+    - master
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
 
 concurrency:
   group: ci-${{github.actor}}-${{github.head_ref || github.run_number}}-${{github.ref}}-build
@@ -11,7 +19,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Install conan
         run: |
           pip install --upgrade conan
@@ -37,12 +45,12 @@ jobs:
         run: |
           git config --global filter.lfs.process "git-lfs filter-process --skip"
         shell: bash
-        
+
       - name: Fetch sdk
         run: |
           curl -O -L "https://github.com/V-Sekai/FBXSDK-Windows/archive/refs/tags/2020.2.zip"
         shell: cmd
-            
+
       - name: install 7z extract
         run: |
           7z x 2020.2.zip
@@ -61,6 +69,7 @@ jobs:
 
       - name: Conan install
         run: |
+          conan install . --build=missing -i build -s build_type=Release -s compiler="Visual Studio"
           conan install . -i build -s build_type=Release -s compiler="Visual Studio" --build=missing -o boost:without_fiber=True -o boost:without_stacktrace=True
         shell: cmd
 
@@ -74,39 +83,46 @@ jobs:
           ./build/Release/FBX2glTF.exe --help
         shell: bash
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: FBX2glTF-windows.exe
-          path: build/Release/FBX2glTF.exe
-
       - name: Copy licenses
         run: |
           mkdir -p result
-          cp sdk/Windows/2020.2/License.rtf result/thirdparty-license.rtf
-          cp LICENSE result/LICENSE
-          cp build/Release/FBX2glTF.exe result/FBX2glTF.exe
+          cp sdk/Windows/2020.2/License.rtf thirdparty-license.rtf
+          cp build/Release/FBX2glTF.exe FBX2glTF.exe
         shell: bash
 
-      - uses: papeloto/action-zip@v1
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: result
-          recursive: false
-          dest: fbx2gltf-windows.zip
-
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: latest-windows
-          prerelease: true
-          title: FBX2glTF Windows packages
           files: |
-            fbx2gltf-windows.zip
+            thirdparty-license.rtf
+            LICENSE
+            FBX2glTF.exe
+
+      - name: FBX2glTF.exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: FBX2glTF.exe
+          path: FBX2glTF.exe
+
+      - name: thirdparty-license.rtf
+        uses: actions/upload-artifact@v3
+        with:
+          name: thirdparty-license.rtf
+          path: thirdparty-license.rtf
+
+      - name: Archive results
+        uses: actions/upload-artifact@v3
+        with:
+          name: LICENSE
+          path: LICENSE
+
   build-ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Install conan
         run: |
           pip install --upgrade conan
@@ -132,12 +148,12 @@ jobs:
         run: |
           git config --global filter.lfs.process "git-lfs filter-process --skip"
         shell: bash
-        
+
       - name: Fetch sdk
         run: |
           curl -O -L "https://github.com/V-Sekai/FBXSDK-Linux/archive/refs/tags/2020.2.zip"
         shell: bash
-            
+
       - name: install 7z extract
         run: |
           7z x 2020.2.zip
@@ -166,46 +182,52 @@ jobs:
 
       - name: Run FBX2glTF help
         run: |
-           ./build/FBX2glTF --help
+          ./build/FBX2glTF --help
         shell: bash
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: FBX2glTF-linux
-          path: build/FBX2glTF
 
       - name: Copy licenses
         run: |
           mkdir -p result
-          cp sdk/Linux/2020.2/License.txt result/thirdparty-license.txt
-          cp LICENSE result/LICENSE
-          cp build/FBX2glTF result/FBX2glTF
+          cp sdk/Linux/2020.2/License.txt thirdparty-license.txt
+          cp build/FBX2glTF FBX2glTF
         shell: bash
 
-      - uses: papeloto/action-zip@v1
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
         with:
-          files: result
-          recursive: false
-          dest: fbx2gltf-linux.zip
-
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: latest-linux
-          prerelease: true
-          title: FBX2glTF Linux packages
           files: |
-            fbx2gltf-linux.zip
+            thirdparty-license.txt
+            LICENSE
+            FBX2glTF
+
+      - name: Archive results
+        uses: actions/upload-artifact@v3
+        with:
+          name: FBX2glTF
+          path: FBX2glTF
+
+      - name: thirdparty-license.txt
+        uses: actions/upload-artifact@v3
+        with:
+          name: thirdparty-license.txt
+          path: thirdparty-license.txt
+
+      - name: LICENSE
+        uses: actions/upload-artifact@v3
+        with:
+          name: LICENSE
+          path: LICENSE
 
   build-macos-x86_64:
     runs-on: macos-11
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Update python
         uses: actions/setup-python@v1
-        
+
       - name: Install conan
         run: |
           pip install --upgrade conan
@@ -231,12 +253,12 @@ jobs:
         run: |
           git config --global filter.lfs.process "git-lfs filter-process --skip"
         shell: bash
-        
+
       - name: Fetch sdk
         run: |
           curl -O -L "https://github.com/V-Sekai/FBXSDK-Darwin/archive/refs/tags/2020.2.zip"
         shell: bash
-            
+
       - name: install 7z extract
         run: |
           7z x 2020.2.zip
@@ -265,38 +287,44 @@ jobs:
 
       - name: Run FBX2glTF help
         run: |
-           ./build/FBX2glTF --help
+          ./build/FBX2glTF --help
         shell: bash
 
       - name: Adhoc signature
         run: |
-           codesign -s - --options=runtime build/FBX2glTF
+          codesign -s - --options=runtime build/FBX2glTF
         shell: bash
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: FBX2glTF-macos
-          path: build/FBX2glTF
 
       - name: Copy licenses
         run: |
           mkdir -p result
-          cp sdk/Darwin/2020.2/License.rtf result/thirdparty-license.rtf
-          cp LICENSE result/LICENSE
-          cp build/FBX2glTF result/FBX2glTF
+          cp sdk/Darwin/2020.2/License.rtf thirdparty-license.rtf
+          cp build/FBX2glTF FBX2glTF-macos-x86_64
         shell: bash
 
-      - uses: papeloto/action-zip@v1
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: result
-          recursive: false
-          dest: fbx2gltf-macos.zip
-
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: latest-macos
-          prerelease: true
-          title: FBX2glTF Macos x86_64 packages
           files: |
-            fbx2gltf-macos.zip
+            thirdparty-license.rtf
+            LICENSE
+            FBX2glTF-macos-x86_64
+
+      - name: FBX2glTF-macos-x86_64
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-packages
+          path: FBX2glTF-macos-x86_64
+
+      - name: thirdparty-license.rtf
+        uses: actions/upload-artifact@v3
+        with:
+          name: thirdparty-license.rtf
+          path: thirdparty-license.rtf
+
+      - name: LICENSE
+        uses: actions/upload-artifact@v3
+        with:
+          name: LICENSE
+          path: LICENSE
