@@ -118,24 +118,15 @@ std::shared_ptr<TextureData> TextureBuilder::combine(
     }
   }
 
-  // write a .png iff we need transparency in the destination texture
-  bool png = includeAlphaChannel;
-
   std::vector<char> imgBuffer;
-  int res;
-  if (png) {
-    res = stbi_write_png_to_func(
-        WriteToVectorContext,
-        &imgBuffer,
-        width,
-        height,
-        channels,
-        mergedPixels.data(),
-        width * channels);
-  } else {
-    res = stbi_write_jpg_to_func(
-        WriteToVectorContext, &imgBuffer, width, height, channels, mergedPixels.data(), 80);
-  }
+  int res = stbi_write_png_to_func(
+      WriteToVectorContext,
+      &imgBuffer,
+      width,
+      height,
+      channels,
+      mergedPixels.data(),
+      width * channels);
   if (!res) {
     fmt::printf("Warning: failed to generate merge texture '%s'.\n", mergedFilename);
     return nullptr;
@@ -145,9 +136,9 @@ std::shared_ptr<TextureData> TextureBuilder::combine(
   if (options.outputBinary && !options.separateTextures) {
     const auto bufferView =
         gltf.AddRawBufferView(*gltf.defaultBuffer, imgBuffer.data(), to_uint32(imgBuffer.size()));
-    image = new ImageData(mergedName, *bufferView, png ? "image/png" : "image/jpeg");
+    image = new ImageData(mergedName, *bufferView, "image/png");
   } else {
-    const std::string imageFilename = mergedFilename + (png ? ".png" : ".jpg");
+    const std::string imageFilename = mergedFilename + (".png");
     const std::string imagePath = outputFolder + imageFilename;
     FILE* fp = fopen(imagePath.c_str(), "wb");
     if (fp == nullptr) {
