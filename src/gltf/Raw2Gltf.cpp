@@ -170,6 +170,9 @@ ModelData* Raw2Gltf(
 
       for (size_t channelIx = 0; channelIx < animation.channels.size(); channelIx++) {
         const RawChannel& channel = animation.channels[channelIx];
+        if (channel.nodeIndex < 0) {
+          continue;
+        }
         const RawNode& node = raw.GetNode(channel.nodeIndex);
 
         if (verboseOutput) {
