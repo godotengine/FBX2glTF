@@ -2,9 +2,9 @@
 
 A command-line tool for the conversion of 3D model assets on the FBX file format to the glTF file format. 
 
-Change skinning-weights to 4 if your engine does not support that feature.
+Change skinning-weights to 4 `--skinning-weights 4`, if your engine does not support that feature. 
 
-Change the default import of the engine to be different from 30 fps if needed.
+Change the default import of the engine to be different from 30 fps `--anim-framerate (bake24|bake30|bake60)` if needed.
 
 ## Platform binaries
 
