@@ -859,6 +859,7 @@ ModelData* Raw2Gltf(
             // Write out inverseBindMatrices
             auto accIBM = gltf->AddAccessorAndView(buffer, GLT_MAT4F, inverseBindMatrices);
             auto skeletonRoot = require(nodesById, rawSurface.skeletonRootId);
+            std::vector<uint32_t> jointIndexes;
             auto skin = *gltf->skins.hold(new SkinData(jointIndexes, *accIBM, skeletonRoot));
             nodeData->SetSkin(skin.ix);
           }
