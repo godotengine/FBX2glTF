@@ -131,7 +131,7 @@ jobs:
           add-apt-repository -y ppa:ubuntu-toolchain-r/test # For gcc-10.
           add-apt-repository -y ppa:git-core/ppa # For git>=2.18.
           apt-get update
-          apt-get install -y git gcc-10 autoconf automake build-essential cmake gettext libtool-bin locales ninja-build pkg-config unzip python3-pip git-lfs zstd p7zip-full
+          apt-get install -y autoconf automake gettext libtool-bin locales ninja-build pkg-config unzip git gcc-10 build-essential cmake gettext libtool-bin locales python3-pip git-lfs zstd p7zip-full
           pip3 install --upgrade conan
         shell: bash
 
