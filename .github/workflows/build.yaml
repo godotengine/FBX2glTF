@@ -22,8 +22,6 @@ jobs:
 
       - name: Install conan
         run: |
-          apt-get update
-          apt-get install -y autoconf automake build-essential cmake gettext libtool-bin locales ninja-build pkg-config unzip
           pip install --upgrade conan
         shell: bash
 
@@ -128,6 +126,8 @@ jobs:
 
       - name: Install conan
         run: |
+          apt-get update
+          apt-get install -y autoconf automake build-essential cmake gettext libtool-bin locales ninja-build pkg-config unzip
           pip install --upgrade conan
         shell: bash
 
