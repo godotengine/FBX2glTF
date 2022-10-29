@@ -127,7 +127,7 @@ jobs:
       - name: Install conan
         run: |
           apt-get update
-          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
+          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
           apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
           apt-get install -y software-properties-common
           add-apt-repository -y ppa:ubuntu-toolchain-r/test # For gcc-10.
