@@ -17,7 +17,7 @@
 #include <Windows.h>
 #endif
 
-#define FBX2GLTF_VERSION std::string("0.12.9")
+#define FBX2GLTF_VERSION std::string("0.13.0")
 
 #include <fmt/printf.h>
 
