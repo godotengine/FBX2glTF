@@ -1,4 +1,4 @@
-name: "Build FBX2GLTF"
+name: "Build FBX2glTF"
 on:
   pull_request:
     branches:
@@ -14,11 +14,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-win-10:
+  build-windows:
     runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install conan
         run: |
@@ -82,11 +82,14 @@ jobs:
           ./build/Release/FBX2glTF.exe --help
         shell: bash
 
-      - name: Copy licenses
+      - name: Prepare artifacts
         run: |
-          mkdir -p result
-          cp sdk/Windows/2020.2/License.rtf thirdparty-license.rtf
-          cp build/Release/FBX2glTF.exe FBX2glTF.exe
+          export TARGET=FBX2glTF-windows-x86_64
+          mkdir $TARGET
+          cp sdk/Windows/2020.2/License.rtf $TARGET/FBX-SDK-License.rtf
+          cp LICENSE $TARGET/FBX2glTF-License.txt
+          cp build/Release/FBX2glTF.exe $TARGET/FBX2glTF-windows-x86_64.exe
+          7z a -r $TARGET.zip $TARGET
         shell: bash
 
       - name: Release
@@ -94,33 +97,22 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            thirdparty-license.rtf
-            LICENSE
-            FBX2glTF.exe
+            FBX2glTF-windows-x86_64.zip
+            FBX2glTF-windows-x86_64/FBX2glTF-License.txt
+            FBX2glTF-windows-x86_64/FBX-SDK-License.rtf
 
-      - name: FBX2glTF.exe
+      - name: FBX2glTF-windows-x86_64
         uses: actions/upload-artifact@v3
         with:
-          name: FBX2glTF.exe
-          path: FBX2glTF.exe
+          name: FBX2glTF-windows-x86_64
+          path: FBX2glTF-windows-x86_64/*
 
-      - name: thirdparty-license.rtf
-        uses: actions/upload-artifact@v3
-        with:
-          name: thirdparty-license.rtf
-          path: thirdparty-license.rtf
 
-      - name: Archive results
-        uses: actions/upload-artifact@v3
-        with:
-          name: LICENSE
-          path: LICENSE
-
-  build-ubuntu:
+  build-linux:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install conan
         run: |
@@ -184,48 +176,39 @@ jobs:
           ./build/FBX2glTF --help
         shell: bash
 
-      - name: Copy licenses
+      - name: Prepare artifacts
         run: |
-          mkdir -p result
-          cp sdk/Linux/2020.2/License.txt thirdparty-license.txt
-          cp build/FBX2glTF FBX2glTF
+          export TARGET=FBX2glTF-linux-x86_64
+          mkdir $TARGET
+          cp sdk/Linux/2020.2/License.txt $TARGET/FBX-SDK-License.txt
+          cp LICENSE $TARGET/FBX2glTF-License.txt
+          cp build/FBX2glTF $TARGET/FBX2glTF-linux-x86_64
+          7z a -r $TARGET.zip $TARGET
         shell: bash
 
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: |
-            thirdparty-license.txt
-            LICENSE
-            FBX2glTF
+          files: FBX2glTF-linux-x86_64.zip
 
-      - name: Archive results
+      - name: FBX2glTF-linux-x86_64
         uses: actions/upload-artifact@v3
         with:
-          name: FBX2glTF
-          path: FBX2glTF
+          name: FBX2glTF-linux-x86_64
+          path: FBX2glTF-linux-x86_64/*
 
-      - name: thirdparty-license.txt
-        uses: actions/upload-artifact@v3
-        with:
-          name: thirdparty-license.txt
-          path: thirdparty-license.txt
 
-      - name: LICENSE
-        uses: actions/upload-artifact@v3
-        with:
-          name: LICENSE
-          path: LICENSE
-
-  build-macos-x86_64:
+  build-macos:
     runs-on: macos-11
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Update python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3'
 
       - name: Install conan
         run: |
@@ -294,36 +277,24 @@ jobs:
           codesign -s - --options=runtime build/FBX2glTF
         shell: bash
 
-      - name: Copy licenses
+      - name: Prepare artifacts
         run: |
-          mkdir -p result
-          cp sdk/Darwin/2020.2/License.rtf thirdparty-license.rtf
-          cp build/FBX2glTF FBX2glTF-macos-x86_64
+          export TARGET=FBX2glTF-macos-x86_64
+          mkdir $TARGET
+          cp sdk/Darwin/2020.2/License.rtf $TARGET/FBX-SDK-License.rtf
+          cp LICENSE $TARGET/FBX2glTF-License.txt
+          cp build/FBX2glTF $TARGET/FBX2glTF-macos-x86_64
+          7z a -r $TARGET.zip $TARGET
         shell: bash
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: |
-            thirdparty-license.rtf
-            LICENSE
-            FBX2glTF-macos-x86_64
+          files: FBX2glTF-macos-x86_64.zip
 
       - name: FBX2glTF-macos-x86_64
         uses: actions/upload-artifact@v3
         with:
-          name: macos-packages
-          path: FBX2glTF-macos-x86_64
-
-      - name: thirdparty-license.rtf
-        uses: actions/upload-artifact@v3
-        with:
-          name: thirdparty-license.rtf
-          path: thirdparty-license.rtf
-
-      - name: LICENSE
-        uses: actions/upload-artifact@v3
-        with:
-          name: LICENSE
-          path: LICENSE
+          name: FBX2glTF-macos-x86_64
+          path: FBX2glTF-macos-x86_64/*
