@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(FBX2glTF)
+project(libFBX2glTF)
 
 set(typical_usage_str
   "Example usage:\n\
@@ -12,7 +12,8 @@ if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     "Building from within the source tree is not supported! ${typical_usage_str}")
 endif ()
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 include(ExternalProject)
@@ -44,8 +45,6 @@ find_package(Threads REQUIRED)
 
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_BINARY_DIR}")
 
-# stuff we get from Conan
-find_package(Boost 1.76 COMPONENTS system filesystem program_options REQUIRED )
 find_package(ZLIB MODULE REQUIRED)
 find_package(fmt MODULE REQUIRED)
 find_package(Iconv MODULE REQUIRED)
@@ -112,6 +111,8 @@ ExternalProject_Add(CPPCodec
 )
 set(CPPCODEC_INCLUDE_DIR "${CMAKE_BINARY_DIR}/cppcodec/src/CPPCodec")
 
+set(CMAKE_BUILD_TYPE Release)
+
 if (APPLE)
     find_library(CF_FRAMEWORK CoreFoundation)
     message("CoreFoundation Framework: ${CF_FRAMEWORK}")
@@ -119,7 +120,6 @@ if (APPLE)
 endif()
 
 set(LIB_SOURCE_FILES
-        src/FBX2glTF.h
         src/fbx/materials/3dsMaxPhysicalMaterial.cpp
         src/fbx/materials/FbxMaterials.cpp
         src/fbx/materials/FbxMaterials.hpp
@@ -180,12 +180,9 @@ set(LIB_SOURCE_FILES
         third_party/CLI11/CLI11.hpp
 )
 
-add_library(libFBX2glTF STATIC ${LIB_SOURCE_FILES})
-set_target_properties(libFBX2glTF PROPERTIES OUTPUT_NAME "FBX2glTF")
-add_executable(FBX2glTF src/FBX2glTF.cpp)
-set_target_properties(FBX2glTF PROPERTIES OUTPUT_NAME "FBX2glTF")
+add_library(libfbx ${LIB_SOURCE_FILES})
 
-add_dependencies(libFBX2glTF
+add_dependencies(libfbx
   Draco
   MathFu
   FiFoMap
@@ -194,21 +191,15 @@ add_dependencies(libFBX2glTF
 
 if (NOT MSVC)
   # Disable annoying & spammy warning from FBX SDK header file
-  target_compile_options(libFBX2glTF PRIVATE
-    "-Wno-null-dereference"
-    "-Wunused"
-    )
-  target_compile_options(FBX2glTF PRIVATE
+  target_compile_options(libfbx PRIVATE
     "-Wno-null-dereference"
     "-Wunused"
     )
 endif()
 
-target_link_libraries(libFBX2glTF
+target_link_libraries(libfbx
   ${FRAMEWORKS}
   ${DRACO_LIB}
-  Boost::system
-  Boost::filesystem
   optimized ${FBXSDK_LIBRARY}
   debug ${FBXSDK_LIBRARY_DEBUG}
   fmt::fmt
@@ -219,11 +210,19 @@ target_link_libraries(libFBX2glTF
   ${CMAKE_THREAD_LIBS_INIT}
 )
 
-target_include_directories(libFBX2glTF PUBLIC
+add_library( libFBX2glTF SHARED src/register_types.cpp src/libfbx2gltf.cpp )
+set_target_properties(libFBX2glTF PROPERTIES OUTPUT_NAME "libFBX2glTF")
+
+target_link_libraries( libFBX2glTF libfbx )
+
+target_include_directories(libfbx PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/godot-cpp/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/godot-cpp/gen/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/godot-cpp/gdextension
 )
 
-target_include_directories(libFBX2glTF SYSTEM PUBLIC
+target_include_directories(libfbx SYSTEM PUBLIC
   "third_party/stb"
   "third_party/json"
   ${FBXSDK_INCLUDE_DIR}
@@ -233,7 +232,7 @@ target_include_directories(libFBX2glTF SYSTEM PUBLIC
   ${CPPCODEC_INCLUDE_DIR}
 )
 
-target_include_directories(FBX2glTF PUBLIC
+target_include_directories(libfbx PUBLIC
   "third_party/CLI11"
 )
 
@@ -241,9 +240,31 @@ if (APPLE)
 set(ICONV_MAC_LIB iconv)
 endif()
 
-target_link_libraries(FBX2glTF libFBX2glTF ${ICONV_MAC_LIB})
+target_link_libraries(libfbx ${ICONV_MAC_LIB})
 
-install (TARGETS libFBX2glTF FBX2glTF
+install (TARGETS libFBX2glTF
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
+)
+
+# godot-cpp
+# From here: https://github.com/godotengine/godot-cpp
+if ( NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/godot-cpp/Makefile" )
+    message(
+        FATAL_ERROR
+            "[libFBX2glTF] The godot-cpp submodule was not downloaded. Please update submodules: git submodule update --init --recursive."
+    )
+endif()
+
+set( GODOT_CPP_SYSTEM_HEADERS ON CACHE BOOL "" FORCE )
+
+add_subdirectory( godot-cpp )
+
+set_target_properties( godot-cpp
+    PROPERTIES
+        CXX_VISIBILITY_PRESET hidden    # visibility needs to be the same as the main library
+)
+
+target_link_libraries( libfbx
+    godot-cpp 
 )

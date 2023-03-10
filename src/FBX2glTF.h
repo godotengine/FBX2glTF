@@ -133,4 +133,6 @@ struct GltfOptions {
 
   /** Temporary directory used by FBX SDK. */
   std::string fbxTempDir;
+
+  std::string extBufferFilename = "buffer.bin";
 };

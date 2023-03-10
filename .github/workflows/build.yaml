@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Install conan
         run: |
@@ -77,18 +79,13 @@ jobs:
           conan build -bf build .
         shell: cmd
 
-      - name: Run FBX2glTF help
-        run: |
-          ./build/Release/FBX2glTF.exe --help
-        shell: bash
-
       - name: Prepare artifacts
         run: |
           export TARGET=FBX2glTF-windows-x86_64
           mkdir $TARGET
           cp sdk/Windows/2020.2/License.rtf $TARGET/FBX-SDK-License.rtf
           cp LICENSE $TARGET/FBX2glTF-License.txt
-          cp build/Release/FBX2glTF.exe $TARGET/FBX2glTF-windows-x86_64.exe
+          cp build/Release/libFBX2glTF.dll $TARGET/libFBX2glTF.dll
           7z a -r $TARGET.zip $TARGET
         shell: bash
 
@@ -113,6 +110,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Install conan
         run: |
@@ -171,18 +170,13 @@ jobs:
           conan build -bf build .
         shell: bash
 
-      - name: Run FBX2glTF help
-        run: |
-          ./build/FBX2glTF --help
-        shell: bash
-
       - name: Prepare artifacts
         run: |
           export TARGET=FBX2glTF-linux-x86_64
           mkdir $TARGET
           cp sdk/Linux/2020.2/License.txt $TARGET/FBX-SDK-License.txt
           cp LICENSE $TARGET/FBX2glTF-License.txt
-          cp build/FBX2glTF $TARGET/FBX2glTF-linux-x86_64
+          cp build/libFBX2glTF $TARGET/libFBX2glTF-linux-x86_64
           7z a -r $TARGET.zip $TARGET
         shell: bash
 
@@ -204,6 +198,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Update python
         uses: actions/setup-python@v4
@@ -267,14 +263,9 @@ jobs:
           env CMAKE_OSX_ARCHITECTURES=x86_64 conan build -bf build .
         shell: bash
 
-      - name: Run FBX2glTF help
-        run: |
-          ./build/FBX2glTF --help
-        shell: bash
-
       - name: Adhoc signature
         run: |
-          codesign -s - --options=runtime build/FBX2glTF
+          codesign -s - --options=runtime build/libFBX2glTF
         shell: bash
 
       - name: Prepare artifacts
@@ -283,7 +274,7 @@ jobs:
           mkdir $TARGET
           cp sdk/Darwin/2020.2/License.rtf $TARGET/FBX-SDK-License.rtf
           cp LICENSE $TARGET/FBX2glTF-License.txt
-          cp build/FBX2glTF $TARGET/FBX2glTF-macos-x86_64
+          cp build/libFBX2glTF $TARGET/libFBX2glTF-macos-x86_64
           7z a -r $TARGET.zip $TARGET
         shell: bash
 

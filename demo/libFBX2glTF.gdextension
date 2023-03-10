@@ -1,0 +1,8 @@
+[configuration]
+
+entry_symbol = "fbx2gltf_library_init"
+
+[libraries]
+
+windows.x86_64.debug = "res://libFBX2glTF.dll"
+windows.x86_64.release = "res://libFBX2glTF.dll"
