@@ -25,12 +25,6 @@ jobs:
           pip install --upgrade conan
         shell: bash
 
-      - name: Setup conan profile
-        run: |
-          conan profile new default --detect
-          conan profile show default
-        shell: bash
-
       - name: Setup filter.lfs.required
         run: |
           git config --global filter.lfs.required false
@@ -117,12 +111,6 @@ jobs:
       - name: Install conan
         run: |
           pip install --upgrade conan
-        shell: bash
-
-      - name: Setup conan profile
-        run: |
-          conan profile new default --detect
-          conan profile show default
         shell: bash
 
       - name: Setup filter.lfs.required
@@ -213,12 +201,6 @@ jobs:
       - name: Install conan
         run: |
           pip install --upgrade conan
-        shell: bash
-
-      - name: Setup conan profile
-        run: |
-          conan profile new default --detect
-          conan profile show default
         shell: bash
 
       - name: Setup filter.lfs.required
