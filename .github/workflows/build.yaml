@@ -22,7 +22,7 @@ jobs:
 
       - name: Install conan
         run: |
-          pip install --upgrade conan
+          pip install --upgrade conan==1.58
         shell: bash
 
       - name: Setup conan profile
@@ -116,7 +116,7 @@ jobs:
 
       - name: Install conan
         run: |
-          pip install --upgrade conan
+          pip install --upgrade conan==1.58
         shell: bash
 
       - name: Setup conan profile
@@ -212,7 +212,7 @@ jobs:
 
       - name: Install conan
         run: |
-          pip install --upgrade conan
+          pip install --upgrade conan==1.58
         shell: bash
 
       - name: Setup conan profile
