@@ -355,6 +355,7 @@ struct RawNode {
   long surfaceId;
   long lightIx;
   std::vector<std::string> userProperties;
+  int extraSkinIx;
 };
 
 class RawModel {
@@ -410,7 +411,7 @@ class RawModel {
       const float nearZ,
       const float farZ);
   int AddNode(const RawNode& node);
-  int AddNode(const long id, const char* name, const long parentId);
+  int AddNode(const long id, const char* name, const long parentId, const int extraSkinIx);
   void SetRootNode(const long nodeId) {
     rootNodeId = nodeId;
   }
@@ -541,9 +542,19 @@ class RawModel {
       const int keepAttribs,
       const bool forceDiscrete) const;
 
+  int CreateExtraSkinIndex() {
+    int ret = nextExtraSkinIx;
+    nextExtraSkinIx++;
+    return ret;
+  }
+  int GetExtraSkinCount() const {
+    return nextExtraSkinIx;
+  }
+
  private:
   Vec3f getFaceNormal(int verts[3]) const;
 
+  int nextExtraSkinIx;
   long rootNodeId;
   int vertexAttributes;
   int globalMaxWeights;

@@ -853,6 +853,18 @@ ModelData* Raw2Gltf(
       }
     }
 
+    std::vector<std::vector<uint32_t>> extraJointIndexes;
+    extraJointIndexes.resize(raw.GetExtraSkinCount());
+    for (int i = 0; i < raw.GetNodeCount(); i++) {
+      const RawNode& node = raw.GetNode(i);
+      if (node.extraSkinIx >= 0) {
+        extraJointIndexes[node.extraSkinIx].push_back(i);
+      }
+    }
+    for (int i = 0; i < extraJointIndexes.size(); i++) {
+      gltf->skins.hold(new SkinData(extraJointIndexes[i], true));
+    }
+
     //
     // cameras
     //

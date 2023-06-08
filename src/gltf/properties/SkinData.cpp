@@ -18,9 +18,22 @@ SkinData::SkinData(
     : Holdable(),
       joints(joints),
       inverseBindMatrices(inverseBindMatricesAccessor.ix),
-      skeletonRootNode(skeletonRootNode.ix) {}
+      skeletonRootNode(skeletonRootNode.ix),
+      isExtraSkin(false) {}
+
+SkinData::SkinData(
+    const std::vector<uint32_t> joints,
+    bool isExtraSkin)
+    : Holdable(),
+      joints(joints),
+      inverseBindMatrices(0),
+      skeletonRootNode(0),
+      isExtraSkin(true) {}
 
 json SkinData::serialize() const {
+  if (isExtraSkin) {
+    return {{"joints", joints}};
+  }
   return {
       {"joints", joints},
       {"inverseBindMatrices", inverseBindMatrices},

@@ -69,7 +69,7 @@ size_t RawVertex::Difference(const RawVertex& other) const {
   return attributes;
 }
 
-RawModel::RawModel() : vertexAttributes(0) {}
+RawModel::RawModel() : nextExtraSkinIx(0), rootNodeId(0), vertexAttributes(0), globalMaxWeights(0) {}
 
 void RawModel::AddVertexAttribute(const RawVertexAttribute attrib) {
   vertexAttributes |= attrib;
@@ -311,7 +311,7 @@ int RawModel::AddCameraOrthographic(
   return (int)cameras.size() - 1;
 }
 
-int RawModel::AddNode(const long id, const char* name, const long parentId) {
+int RawModel::AddNode(const long id, const char* name, const long parentId, const int extraSkinIx) {
   assert(name[0] != '\0');
 
   for (size_t i = 0; i < nodes.size(); i++) {
@@ -330,6 +330,7 @@ int RawModel::AddNode(const long id, const char* name, const long parentId) {
   joint.translation = Vec3f(0, 0, 0);
   joint.rotation = Quatf(0, 0, 0, 1);
   joint.scale = Vec3f(1, 1, 1);
+  joint.extraSkinIx = extraSkinIx;
 
   nodes.emplace_back(joint);
   return (int)nodes.size() - 1;

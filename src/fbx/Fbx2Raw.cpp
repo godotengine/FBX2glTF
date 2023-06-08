@@ -688,10 +688,19 @@ static void ReadNodeHierarchy(
     FbxScene* pScene,
     FbxNode* pNode,
     const long parentId,
-    const std::string& path) {
+    const std::string& path,
+    int extraSkinIx) {
   const FbxUInt64 nodeId = pNode->GetUniqueID();
   const char* nodeName = pNode->GetName();
-  const int nodeIndex = raw.AddNode(nodeId, nodeName, parentId);
+  FbxSkeleton *skel = pNode->GetSkeleton();
+  if (skel == nullptr) {
+    extraSkinIx = -1;
+  } else {
+    if (skel->IsSkeletonRoot()) {
+      extraSkinIx = raw.CreateExtraSkinIndex();
+    }
+  }
+  const int nodeIndex = raw.AddNode(nodeId, nodeName, parentId, extraSkinIx);
   RawNode& node = raw.GetNode(nodeIndex);
 
   FbxTransform::EInheritType lInheritType;
@@ -745,7 +754,7 @@ static void ReadNodeHierarchy(
     raw.SetRootNode(nodeId);
   }
   for (int child = 0; child < pNode->GetChildCount(); child++) {
-    ReadNodeHierarchy(raw, pScene, pNode->GetChild(child), nodeId, newPath);
+    ReadNodeHierarchy(raw, pScene, pNode->GetChild(child), nodeId, newPath, extraSkinIx);
   }
 }
 
@@ -1174,7 +1183,7 @@ bool LoadFBXFile(
   // this is always 0.01, but let's opt for clarity.
   scaleFactor = FbxSystemUnit::m.GetConversionFactorFrom(FbxSystemUnit::cm);
 
-  ReadNodeHierarchy(raw, pScene, pScene->GetRootNode(), 0, "");
+  ReadNodeHierarchy(raw, pScene, pScene->GetRootNode(), 0, "", -1);
   ReadNodeAttributes(raw, pScene, pScene->GetRootNode(), textureLocations);
   ReadAnimations(raw, pScene, options);
 
