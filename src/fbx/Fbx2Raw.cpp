@@ -997,6 +997,10 @@ static void ReadAnimations(RawModel& raw, FbxScene* pScene, const GltfOptions& o
           (float)totalSizeInBytes * 1e-6f);
     }
   }
+  if (animationCount > 0) {
+    FbxAnimStack* pAnimStack = pScene->GetSrcObject<FbxAnimStack>(0);
+    pScene->SetCurrentAnimationStack(pAnimStack);
+  }
 }
 
 static std::string FindFileLoosely(
@@ -1182,6 +1186,12 @@ bool LoadFBXFile(
   }
   // this is always 0.01, but let's opt for clarity.
   scaleFactor = FbxSystemUnit::m.GetConversionFactorFrom(FbxSystemUnit::cm);
+
+  const int animationCount = pScene->GetSrcObjectCount<FbxAnimStack>();
+  if (animationCount > 0) {
+    FbxAnimStack* pAnimStack = pScene->GetSrcObject<FbxAnimStack>(0);
+    pScene->SetCurrentAnimationStack(pAnimStack);
+  }
 
   ReadNodeHierarchy(raw, pScene, pScene->GetRootNode(), 0, "", -1);
   ReadNodeAttributes(raw, pScene, pScene->GetRootNode(), textureLocations);
