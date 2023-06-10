@@ -16,9 +16,14 @@ struct SkinData : Holdable {
       const AccessorData& inverseBindMatricesAccessor,
       const NodeData& skeletonRootNode);
 
+  SkinData(
+      const std::vector<uint32_t> joints,
+      bool isExtraSkin);
+
   json serialize() const override;
 
   const std::vector<uint32_t> joints;
   const uint32_t skeletonRootNode;
   const uint32_t inverseBindMatrices;
+  const bool isExtraSkin;
 };
