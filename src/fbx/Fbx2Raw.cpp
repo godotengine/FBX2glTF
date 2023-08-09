@@ -182,7 +182,11 @@ static void ReadMesh(
   const FbxVector4 meshTranslation = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
   const FbxVector4 meshRotation = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
   const FbxVector4 meshScaling = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
-  const FbxAMatrix meshTransform(meshTranslation, meshRotation, meshScaling);
+  FbxAMatrix meshTransform(meshTranslation, meshRotation, meshScaling);
+  const FbxVector4 meshRotationPivot = pNode->GetRotationPivot(FbxNode::eSourcePivot);
+  const FbxAMatrix meshPivotTransform(
+      -meshRotationPivot, FbxVector4(0, 0, 0, 0), FbxVector4(1, 1, 1, 1));
+  meshTransform *= meshPivotTransform;
   const FbxMatrix transform = meshTransform;
 
   // Remove translation & scaling from transforms that will bi applied to normals, tangents &
@@ -666,21 +670,21 @@ static void ReadNodeAttributes(
 }
 
 /**
- * Compute the local scale vector to use for a given node. This is an imperfect hack to cope with
- * the FBX node transform's eInheritRrs inheritance type, in which ancestral scale is ignored
+ * Compute the local position incorporating the rotation pivot offset, and subtracting out the pivot
+ * of the parent node.
  */
-static FbxVector4 computeLocalScale(FbxNode* pNode, FbxTime pTime = FBXSDK_TIME_INFINITE) {
-  const FbxVector4 lScale = pNode->EvaluateLocalTransform(pTime).GetS();
-
-  if (pNode->GetParent() == nullptr ||
-      pNode->GetTransform().GetInheritType() != FbxTransform::eInheritRrs) {
-    return lScale;
+static FbxVector4 computeLocalTranslation(FbxNode* pNode, FbxTime pTime = FBXSDK_TIME_INFINITE) {
+  const FbxVector4 meshRotationPivot = pNode->GetRotationPivot(FbxNode::eSourcePivot);
+  const FbxAMatrix meshPivotTransform(
+      meshRotationPivot, FbxVector4(0, 0, 0, 0), FbxVector4(1, 1, 1, 1));
+  FbxAMatrix localTransform = pNode->EvaluateLocalTransform(pTime);
+  localTransform *= meshPivotTransform;
+  FbxVector4 lTranslation = localTransform.GetT();
+  FbxNode* parent = pNode->GetParent();
+  if (pNode->GetParent() != nullptr) {
+    lTranslation -= parent->GetRotationPivot(FbxNode::eSourcePivot);
   }
-  // This is a very partial fix that is only correct for models that use identity scale in their
-  // rig's joints. We could write better support that compares local scale to parent's global scale
-  // and apply the ratio to our local translation. We'll always want to return scale 1, though --
-  // that's the only way to encode the missing 'S' (parent scale) in the transform chain.
-  return FbxVector4(1, 1, 1, 1);
+  return lTranslation;
 }
 
 static void ReadNodeHierarchy(
@@ -692,7 +696,7 @@ static void ReadNodeHierarchy(
     int extraSkinIx) {
   const FbxUInt64 nodeId = pNode->GetUniqueID();
   const char* nodeName = pNode->GetName();
-  FbxSkeleton *skel = pNode->GetSkeleton();
+  FbxSkeleton* skel = pNode->GetSkeleton();
   if (skel == nullptr) {
     extraSkinIx = -1;
   } else {
@@ -731,17 +735,44 @@ static void ReadNodeHierarchy(
           newPath);
     }
   }
-
   // Set the initial node transform.
-  const FbxAMatrix localTransform = pNode->EvaluateLocalTransform();
-  const FbxVector4 localTranslation = localTransform.GetT();
-  const FbxQuaternion localRotation = localTransform.GetQ();
-  const FbxVector4 localScaling = computeLocalScale(pNode);
+  FbxAMatrix localTransform = pNode->EvaluateLocalTransform();
+  FbxVector4 localTranslation = localTransform.GetT();
+  FbxQuaternion localRotation = localTransform.GetQ();
+  FbxVector4 localScale = localTransform.GetS();
 
-  node.translation = toVec3f(localTranslation) * scaleFactor;
-  node.rotation = toQuatf(localRotation);
-  node.scale = toVec3f(localScaling);
+  // Get the geometric transformation.
+  FbxVector4 lPivot = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+  FbxAMatrix pivotTransform;
+  pivotTransform.SetT(lPivot);
+  pivotTransform.SetS(FbxVector4(1, 1, 1));
 
+  FbxNode* parent = pNode->GetParent();
+  if (parent != nullptr) {
+    FbxAMatrix parentTransform = parent->EvaluateLocalTransform(FBXSDK_TIME_INFINITE);
+    FbxVector4 parentScale = parentTransform.GetS();
+    FbxVector4 parentRotation = parentTransform.GetR();
+    FbxVector4 parentTranslation = parentTransform.GetT();
+
+    switch (pNode->InheritType.Get()) {
+      case FbxTransform::eInheritRrSs:
+        // Inherit rotation and scale separately.
+        break;
+      case FbxTransform::eInheritRSrs:
+        // Inherit rotation and scale together.
+        localTransform.SetS(parentScale);
+        localTransform.SetR(parentRotation);
+        break;
+    }
+  }
+
+  localTransform = pivotTransform * localTransform;
+  const FbxVector4 localScaling = localTransform.GetS();
+  localTransform.SetT(localTransform.GetT() + lPivot);
+
+  node.translation = toVec3f(localTransform.GetT()) * scaleFactor;
+  node.rotation = toQuatf(localTransform.GetQ());
+  node.scale = toVec3f(localTransform.GetS());
   if (parentId) {
     RawNode& parentNode = raw.GetNode(raw.GetNodeById(parentId));
     // Add unique child name to the parent node.
@@ -845,9 +876,43 @@ static void ReadAnimations(RawModel& raw, FbxScene* pScene, const GltfOptions& o
     for (int nodeIndex = 0; nodeIndex < nodeCount; nodeIndex++) {
       FbxNode* pNode = pScene->GetNode(nodeIndex);
       const FbxAMatrix baseTransform = pNode->EvaluateLocalTransform();
-      const FbxVector4 baseTranslation = baseTransform.GetT();
+      const FbxVector4 baseTranslation = computeLocalTranslation(pNode);
       const FbxQuaternion baseRotation = baseTransform.GetQ();
-      const FbxVector4 baseScaling = computeLocalScale(pNode);
+
+      FbxAMatrix localTransform = pNode->EvaluateLocalTransform(FBXSDK_TIME_INFINITE);
+
+      // Get the geometric transformation.
+      FbxVector4 lPivot = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+
+      FbxNode* parent = pNode->GetParent();
+      if (parent != nullptr) {
+        FbxAMatrix parentTransform = parent->EvaluateLocalTransform(FBXSDK_TIME_INFINITE);
+        FbxVector4 parentScale = parentTransform.GetS();
+        FbxVector4 parentRotation = parentTransform.GetR();
+        FbxVector4 parentTranslation = parentTransform.GetT();
+
+        switch (pNode->InheritType.Get()) {
+          case FbxTransform::eInheritRrSs:
+            // Inherit rotation and scale separately.
+            break;
+          case FbxTransform::eInheritRSrs:
+            // Inherit rotation and scale together.
+            localTransform.SetS(parentScale);
+            localTransform.SetR(parentRotation);
+            break;
+          case FbxTransform::eInheritRrs:
+            // Inherit rotation, ignore scale.
+            if (parentScale[0] != 0 && parentScale[1] && parentScale[2]) {
+              localTransform.SetS(localTransform.GetS() / parentScale);
+            }
+            localTransform.SetR(parentRotation);
+            break;
+        }
+      }
+      localTransform.SetT(localTransform.GetT() + lPivot);
+
+      const FbxVector4 baseScaling = localTransform.GetS(); // Calculate base scaling
+
       bool hasTranslation = false;
       bool hasRotation = false;
       bool hasScale = false;
@@ -855,15 +920,45 @@ static void ReadAnimations(RawModel& raw, FbxScene* pScene, const GltfOptions& o
 
       RawChannel channel;
       channel.nodeIndex = raw.GetNodeById(pNode->GetUniqueID());
-
       for (FbxLongLong frameIndex = firstFrameIndex; frameIndex <= lastFrameIndex; frameIndex++) {
         FbxTime pTime;
         pTime.SetFrame(frameIndex, eMode);
 
-        const FbxAMatrix localTransform = pNode->EvaluateLocalTransform(pTime);
-        const FbxVector4 localTranslation = localTransform.GetT();
+        FbxAMatrix localTransform = pNode->EvaluateLocalTransform(pTime);
+        const FbxVector4 localTranslation = computeLocalTranslation(pNode, pTime);
         const FbxQuaternion localRotation = localTransform.GetQ();
-        const FbxVector4 localScale = computeLocalScale(pNode, pTime);
+
+        // Get the geometric transformation.
+        FbxVector4 lPivot = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+
+        FbxNode* parent = pNode->GetParent();
+        if (parent != nullptr) {
+          FbxAMatrix parentTransform = parent->EvaluateLocalTransform(pTime);
+          FbxVector4 parentScale = parentTransform.GetS();
+          FbxVector4 parentRotation = parentTransform.GetR();
+          FbxVector4 parentTranslation = parentTransform.GetT();
+
+          switch (pNode->InheritType.Get()) {
+            case FbxTransform::eInheritRrSs:
+              // Inherit rotation and scale separately.
+              break;
+            case FbxTransform::eInheritRSrs:
+              // Inherit rotation and scale together.
+              localTransform.SetS(parentScale);
+              localTransform.SetR(parentRotation);
+              break;
+            case FbxTransform::eInheritRrs:
+              // Inherit rotation, ignore scale.
+              if (parentScale[0] != 0 && parentScale[1] && parentScale[2]) {
+                localTransform.SetS(localTransform.GetS() / parentScale);
+              }
+              localTransform.SetR(parentRotation);
+              break;
+          }
+        }
+        localTransform.SetT(localTransform.GetT() + lPivot);
+
+        const FbxVector4 localScale = localTransform.GetS();
 
         hasTranslation |=
             (fabs(localTranslation[0] - baseTranslation[0]) > epsilon ||
@@ -1074,9 +1169,9 @@ static std::string FindFbxTexture(
     path with the wrong extensions. For instance, all of the art assets may be PSD
     files in the FBX metadata, but in practice they are delivered as TGA or PNG files.
 
-    This function takes a texture file name stored in the FBX, which may be an absolute
-    path on the author's computer such as "C:\MyProject\TextureName.psd", and matches
-    it to a list of existing texture files in the same directory as the FBX file.
+  This function takes a texture file name stored in the FBX, which may be an absolute
+  path on the author's computer such as "C:\MyProject\TextureName.psd", and matches
+  it to a list of existing texture files in the same directory as the FBX file.
 */
 static void FindFbxTextures(
     FbxScene* pScene,
