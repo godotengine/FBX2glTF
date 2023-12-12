@@ -299,7 +299,7 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-      - name: Adhoc signature
+      - name: Sign binary
         run: |
           codesign -s build_certificate --options=runtime build/FBX2glTF
         shell: bash
