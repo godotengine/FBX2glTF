@@ -212,7 +212,8 @@ jobs:
 
       - name: Install conan
         run: |
-          pip install --upgrade conan==1.58
+          echo "Cython<3" > cython_constraint.txt
+          PIP_CONSTRAINT=cython_constraint.txt pip install --upgrade conan==1.58
         shell: bash
 
       - name: Setup conan profile
