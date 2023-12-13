@@ -314,6 +314,28 @@ jobs:
           7z a -r $TARGET.zip $TARGET
         shell: bash
 
+      - name: Submit artifact for notarization
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          xcrun notarytool submit \
+            --apple-id $APPLE_ID \
+            --team-id $APPLE_TEAM_ID \
+            --password $APPLE_APP_SPECIFIC_PASSWORD \
+            --wait \
+            $TARGET.zip
+        shell: bash
+
+      - name: Staple distribution files
+        run: |
+          xcrun stapler staple $TARGET/FBX-SDK-License.rtf
+          xcrun stapler staple $TARGET/FBX2glTF-License.txt
+          xcrun stapler staple $TARGET/FBX2glTF-macos-x86_64
+          7z a -r $TARGET.zip $TARGET
+        shell: bash
+
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
