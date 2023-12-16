@@ -206,7 +206,7 @@ jobs:
       - name: Update python
         uses: actions/setup-python@v4
         with:
-          python-version: "3"
+          python-version: "3.11"
 
       - name: Install conan
         run: |
