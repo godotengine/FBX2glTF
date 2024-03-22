@@ -57,7 +57,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # DRACO
 ExternalProject_Add(Draco
   GIT_REPOSITORY https://github.com/google/draco
-  GIT_TAG 75b82f7b68c797b4e0ff5e73ca8a81e2db3db797
+  GIT_TAG 8786740086a9f4d83f44aa83badfbea4dce7a1b5
   PREFIX draco
   INSTALL_DIR
   CMAKE_ARGS
