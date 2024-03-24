@@ -57,7 +57,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # DRACO
 ExternalProject_Add(Draco
   GIT_REPOSITORY https://github.com/google/draco
-  GIT_TAG 75b82f7b68c797b4e0ff5e73ca8a81e2db3db797
+  GIT_TAG 8786740086a9f4d83f44aa83badfbea4dce7a1b5
   PREFIX draco
   INSTALL_DIR
   CMAKE_ARGS
@@ -181,7 +181,7 @@ set(LIB_SOURCE_FILES
 )
 
 add_library(libFBX2glTF STATIC ${LIB_SOURCE_FILES})
-set_target_properties(libFBX2glTF PROPERTIES OUTPUT_NAME "FBX2glTF")
+set_target_properties(libFBX2glTF PROPERTIES OUTPUT_NAME "libFBX2glTF")
 add_executable(FBX2glTF src/FBX2glTF.cpp)
 set_target_properties(FBX2glTF PROPERTIES OUTPUT_NAME "FBX2glTF")
 
