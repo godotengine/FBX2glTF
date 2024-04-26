@@ -6,8 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <boost/nowide/filesystem.hpp>
+#include <boost/nowide/cstdio.hpp>
 #include <iostream>
 #include <map>
 #include <unordered_map>
@@ -20,6 +21,9 @@
 #include "gltf/Raw2Gltf.hpp"
 #include "utils/File_Utils.hpp"
 #include "utils/String_Utils.hpp"
+
+// in Fbx2Raw.cpp
+extern std::string NativeToUTF8(const std::string& str);
 
 bool verboseOutput = false;
 
@@ -313,6 +317,8 @@ int main(int argc, char* argv[]) {
   if (outputPath.empty()) {
     // if -o is not given, default to the basename of the .fbx
     outputPath = "./" + FileUtils::GetFileBase(inputPath);
+  } else {
+    outputPath = NativeToUTF8(outputPath);
   }
   // the output folder in .gltf mode, not used for .glb
   std::string outputFolder;
@@ -365,7 +371,7 @@ int main(int argc, char* argv[]) {
   raw.Condense(gltfOptions.maxSkinningWeights, gltfOptions.normalizeSkinningWeights);
   raw.TransformGeometry(gltfOptions.computeNormals);
 
-  std::ofstream outStream; // note: auto-flushes in destructor
+  boost::nowide::ofstream outStream; // note: auto-flushes in destructor
   const auto streamStart = outStream.tellp();
 
   outStream.open(modelPath, std::ios::trunc | std::ios::ate | std::ios::out | std::ios::binary);
@@ -398,7 +404,7 @@ int main(int argc, char* argv[]) {
   assert(!outputFolder.empty());
 
   const std::string binaryPath = outputFolder + extBufferFilename;
-  FILE* fp = fopen(binaryPath.c_str(), "wb");
+  FILE* fp = boost::nowide::fopen(binaryPath.c_str(), "wb");
   if (fp == nullptr) {
     fmt::fprintf(stderr, "ERROR:: Couldn't open file '%s' for writing.\n", binaryPath);
     return 1;
