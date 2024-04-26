@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <string>
+#include <boost/nowide/fstream.hpp>
 
 // This can be a macro under Windows, confusing Draco
 #undef ERROR
