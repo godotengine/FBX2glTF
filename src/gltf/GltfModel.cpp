@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <boost/nowide/fstream.hpp>
 #include "GltfModel.hpp"
 
 std::shared_ptr<BufferViewData> GltfModel::GetAlignedBufferView(
@@ -44,7 +45,7 @@ std::shared_ptr<BufferViewData> GltfModel::AddBufferViewForFile(
   }
 
   std::shared_ptr<BufferViewData> result;
-  std::ifstream file(filename, std::ios::binary | std::ios::ate);
+  boost::nowide::ifstream file(filename, std::ios::binary | std::ios::ate);
   if (file) {
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
