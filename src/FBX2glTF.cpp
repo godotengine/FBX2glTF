@@ -7,6 +7,7 @@
  */
 
 #include <fstream>
+#include <boost/nowide/filesystem.hpp>
 #include <iostream>
 #include <map>
 #include <unordered_map>
@@ -23,6 +24,8 @@
 bool verboseOutput = false;
 
 int main(int argc, char* argv[]) {
+  boost::nowide::nowide_filesystem();
+  
   GltfOptions gltfOptions;
 
   CLI::App app{
