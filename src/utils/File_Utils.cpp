@@ -8,7 +8,7 @@
 
 #include "File_Utils.hpp"
 
-#include <boost/nowide/fstream.cpp>
+#include <boost/nowide/fstream.hpp>
 #include <set>
 #include <string>
 #include <vector>
