@@ -42,7 +42,7 @@
 
 float scaleFactor;
 
-static std::string NativeToUTF8(const std::string& str) {
+std::string NativeToUTF8(const std::string& str) {
 #if _WIN32
   char* u8cstr = nullptr;
 #if (_UNICODE || UNICODE)
