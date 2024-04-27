@@ -10,7 +10,7 @@
 
 #include <cassert>
 #include <cstdint>
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <iostream>
 
 #include <stb_image.h>
@@ -77,7 +77,7 @@ static const std::vector<TriangleIndex> getIndexArray(const RawModel& raw) {
 }
 
 ModelData* Raw2Gltf(
-    std::ofstream& gltfOutStream,
+    boost::nowide::ofstream& gltfOutStream,
     const std::string& outputFolder,
     const RawModel& raw,
     const GltfOptions& options) {
