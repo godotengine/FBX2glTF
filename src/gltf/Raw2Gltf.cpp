@@ -155,6 +155,14 @@ ModelData* Raw2Gltf(
 
     for (int i = 0; i < raw.GetAnimationCount(); i++) {
       const RawAnimation& animation = raw.GetAnimation(i);
+      
+      if (animation.channels.empty()) {
+        fmt::printf(
+          "Animation '%s' has no channels, skipped\n",
+          animation.name.c_str()
+        );
+        continue;
+      }
 
       auto accessor = gltf->AddAccessorAndView(buffer, GLT_FLOAT, animation.times);
       accessor->min = {*std::min_element(std::begin(animation.times), std::end(animation.times))};
