@@ -8,7 +8,7 @@
 
 #include "File_Utils.hpp"
 
-#include <fstream>
+#include <boost/nowide/fstream.hpp>
 #include <set>
 #include <string>
 #include <vector>
@@ -57,7 +57,7 @@ bool CreatePath(const std::string path) {
 }
 
 bool CopyFile(const std::string& srcFilename, const std::string& dstFilename, bool createPath) {
-  std::ifstream srcFile(srcFilename, std::ios::binary);
+  boost::nowide::ifstream srcFile(srcFilename, std::ios::binary);
   if (!srcFile) {
     fmt::printf("Warning: Couldn't open file %s for reading.\n", srcFilename);
     return false;
@@ -72,7 +72,7 @@ bool CopyFile(const std::string& srcFilename, const std::string& dstFilename, bo
     return false;
   }
 
-  std::ofstream dstFile(dstFilename, std::ios::binary | std::ios::trunc);
+  boost::nowide::ofstream dstFile(dstFilename, std::ios::binary | std::ios::trunc);
   if (!dstFile) {
     fmt::printf("Warning: Couldn't open file %s for writing.\n", dstFilename);
     return false;

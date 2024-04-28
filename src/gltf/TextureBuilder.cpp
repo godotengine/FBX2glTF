@@ -8,6 +8,7 @@
 
 #include "TextureBuilder.hpp"
 
+#include <boost/nowide/cstdio.hpp>
 #include <stb_image.h>
 #include <stb_image_write.h>
 
@@ -140,7 +141,7 @@ std::shared_ptr<TextureData> TextureBuilder::combine(
   } else {
     const std::string imageFilename = mergedFilename + (".png");
     const std::string imagePath = outputFolder + imageFilename;
-    FILE* fp = fopen(imagePath.c_str(), "wb");
+    FILE* fp = boost::nowide::fopen(imagePath.c_str(), "wb");
     if (fp == nullptr) {
       fmt::printf("Warning:: Couldn't write file '%s' for writing.\n", imagePath);
       return nullptr;
