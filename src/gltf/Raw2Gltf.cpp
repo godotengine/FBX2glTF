@@ -822,7 +822,6 @@ ModelData* Raw2Gltf(
 
     for (int i = 0; i < raw.GetNodeCount(); i++) {
       const RawNode& node = raw.GetNode(i);
-      //auto nodeData = gltf->nodes.ptrs[i];
       auto nodeData = nodesById[node.id];
 
       //
