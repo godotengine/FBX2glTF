@@ -173,22 +173,6 @@ static void ReadMesh(
                              : "NO");
   }
 
-  // // The FbxNode geometric transformation describes how a FbxNodeAttribute is offset from
-  // // the FbxNode's local frame of reference. These geometric transforms are applied to the
-  // // FbxNodeAttribute after the FbxNode's local transforms are computed, and are not
-  // // inherited across the node hierarchy.
-  // // Apply the geometric transform to the mesh geometry (vertices, normal etc.) because
-  // // glTF does not have an equivalent to the geometric transform.
-  // const FbxVector4 meshTranslation = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-  // const FbxVector4 meshRotation = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
-  // const FbxVector4 meshScaling = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
-  // const FbxAMatrix meshTransform(meshTranslation, meshRotation, meshScaling);
-
-  // // Remove translation & scaling from transforms that will bi applied to normals, tangents &
-  // // binormals
-  //const FbxMatrix normalTransform(FbxVector4(), meshRotation, meshScaling);
-  //const FbxMatrix inverseTransposeTransform = normalTransform.Inverse().Transpose();
-  
   // TEMP HACK
   FbxAMatrix dummyTransform;
   dummyTransform.SetIdentity();
