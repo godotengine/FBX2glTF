@@ -836,7 +836,7 @@ ModelData* Raw2Gltf(
         if (node.hasGeometricTransform) {
           const auto meshNodeIx = gltf->nodes.ptrs.size();
           auto meshNodeData = gltf->nodes.hold(
-            new NodeData(node.name + "-[Mesh]", node.geometricTranslation, node.geometricRotation, node.geometricScaling, false)
+            new NodeData(node.name + "GeometricHelper", node.geometricTranslation, node.geometricRotation, node.geometricScaling, false)
           );
           meshNodeData->SetMesh(meshData.ix);  
           nodeData->AddChildNode(meshNodeIx);
