@@ -191,9 +191,14 @@ class GltfModel {
     if (!holder.ptrs.empty()) {
       std::vector<json> bits;
       for (const auto& ptr : holder.ptrs) {
-        bits.push_back(ptr->serialize());
+        json bit = ptr->serialize();
+        if (!bit.empty()) {
+          bits.push_back(ptr->serialize());
+        }
       }
-      glTFJson[key] = bits;
+      if (!bits.empty()) {
+        glTFJson[key] = bits;
+      }
     }
   }
 
