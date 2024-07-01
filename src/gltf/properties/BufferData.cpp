@@ -20,7 +20,7 @@ BufferData::BufferData(
     : Holdable(), isGlb(false), uri(isEmbedded ? "" : std::move(uri)), binData(binData) {}
 
 json BufferData::serialize() const {
-  if (binData->size() == 0) {
+  if (binData->empty()) {
     return json{};
   }
     
