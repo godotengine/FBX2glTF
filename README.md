@@ -1,5 +1,14 @@
 # FBX2glTF
 
+> [!NOTE]
+>
+> As of Godot 4.3, FBX2glTF is no longer used. The engine now relies on
+> [ufbx](https://github.com/ufbx/ufbx) instead, which is a built-in library
+> instead of an external command-line tool.
+>
+> As such, **in Godot 4.3 or later, you no longer need to set up FBX2glTF**
+> to import FBX scenes.
+
 A command-line tool for the conversion of 3D model assets on the FBX file format
 to the glTF file format.
 
