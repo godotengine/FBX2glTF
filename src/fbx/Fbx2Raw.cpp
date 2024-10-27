@@ -173,21 +173,11 @@ static void ReadMesh(
                              : "NO");
   }
 
-  // The FbxNode geometric transformation describes how a FbxNodeAttribute is offset from
-  // the FbxNode's local frame of reference. These geometric transforms are applied to the
-  // FbxNodeAttribute after the FbxNode's local transforms are computed, and are not
-  // inherited across the node hierarchy.
-  // Apply the geometric transform to the mesh geometry (vertices, normal etc.) because
-  // glTF does not have an equivalent to the geometric transform.
-  const FbxVector4 meshTranslation = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-  const FbxVector4 meshRotation = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
-  const FbxVector4 meshScaling = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
-  const FbxAMatrix meshTransform(meshTranslation, meshRotation, meshScaling);
-  const FbxMatrix transform = meshTransform;
-
-  // Remove translation & scaling from transforms that will bi applied to normals, tangents &
-  // binormals
-  const FbxMatrix normalTransform(FbxVector4(), meshRotation, meshScaling);
+  // TEMP HACK
+  FbxAMatrix dummyTransform;
+  dummyTransform.SetIdentity();
+  const FbxMatrix transform = dummyTransform;
+  const FbxMatrix normalTransform = dummyTransform;
   const FbxMatrix inverseTransposeTransform = normalTransform.Inverse().Transpose();
 
   raw.AddVertexAttribute(RAW_VERTEX_ATTRIBUTE_POSITION);
@@ -741,6 +731,15 @@ static void ReadNodeHierarchy(
   node.translation = toVec3f(localTranslation) * scaleFactor;
   node.rotation = toQuatf(localRotation);
   node.scale = toVec3f(localScaling);
+
+  const FbxVector4 geometricTranslation = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+  const FbxVector4 geometricRotation = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
+  const FbxVector4 geometricScaling = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+  FbxAMatrix geometricTransform(geometricTranslation, geometricRotation, geometricScaling);
+  node.hasGeometricTransform = !geometricTransform.IsIdentity();
+  node.geometricTranslation = toVec3f(geometricTransform.GetT()) * scaleFactor;
+  node.geometricRotation = toQuatf(geometricTransform.GetQ());
+  node.geometricScaling = toVec3f(geometricTransform.GetS());
 
   if (parentId) {
     RawNode& parentNode = raw.GetNode(raw.GetNodeById(parentId));
