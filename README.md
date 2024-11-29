@@ -8,9 +8,16 @@
 >
 > As such, **in Godot 4.3 or later, you no longer need to set up FBX2glTF**
 > to import FBX scenes.
+>
+> We no longer actively maintain this repository as we won't be needing it
+> going forward. If you want to build on top of it for your own use cases,
+> feel free to fork it.
 
 A command-line tool for the conversion of 3D model assets on the FBX file format
 to the glTF file format.
+
+This is a fork of [facebookincubator/FBX2glTF](https://github.com/facebookincubator/FBX2glTF)
+to fix issues for the needs of [Godot Engine](https://godotengine.org/).
 
 Change skinning-weights to 4 with `--skinning-weights 4`, if your engine does not support the 8 bone weights feature.
 
